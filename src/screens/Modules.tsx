@@ -59,7 +59,15 @@ export function ModuleScreen({code,images,...props}:ScreenProps&{code:ModuleCode
  const diff=initial&&final?Number(final.value)-Number(initial.value):null;
  function edit(index:number,partial:Partial<Draft>){
   const existing=responses.find(r=>r.item_index===index);
-  setDrafts(old=>({...old,[index]:{status:existing?.status||'',detail:existing?.detail||'',photo:null,baseRevision:existing?.revision??null,...old[index],...partial}}));
+  setDrafts(old=>{
+   const current:Draft=old[index]??{
+    status:existing?.status||'',
+    detail:existing?.detail||'',
+    photo:null,
+    baseRevision:existing?.revision??null
+   };
+   return {...old,[index]:{...current,...partial}};
+  });
  }
  async function saveCondition(){
   if(!condition) return;
