@@ -24,3 +24,27 @@ export function isShiftEnded(s:{shift_date:string;kind:string},now:Date=new Date
  const current=getCurrentShiftKey(now);
  return s.shift_date<current.date || (s.shift_date===current.date && s.kind==='diurno' && current.kind==='noturno');
 }
+
+// Períodos de produção são opcionais e pertencem ao turno selecionado.
+// Use a data seguinte para registros noturnos depois da meia-noite.
+export function productionShiftBounds(shift:{shift_date:string;kind:string}){
+ const startLocal=`${shift.shift_date}T${shift.kind==='diurno'?'07:00':'19:00'}`;
+ const endLocal=shift.kind==='diurno'?`${shift.shift_date}T19:00`:`${nextDate(shift.shift_date)}T07:00`;
+ return {start:spInputToISO(startLocal)!,end:spInputToISO(endLocal)!};
+}
+export function productionPeriodError(start:string|null,end:string|null,shift:{shift_date:string;kind:string}):string|null{
+ const {start:shiftStart,end:shiftEnd}=productionShiftBounds(shift);
+ for(const v of [start,end]){
+  if(v && (!Number.isFinite(Date.parse(v))||Date.parse(v)<Date.parse(shiftStart)||Date.parse(v)>Date.parse(shiftEnd))){
+   return 'O início e o término devem estar dentro do turno selecionado.';
+  }
+ }
+ if(start&&end&&Date.parse(end)<Date.parse(start))return 'O término não pode ser anterior ao início. Na virada da meia-noite, use a data seguinte.';
+ return null;
+}
+export function productionPeriodLabel(start:string|null|undefined,end:string|null|undefined){
+ if(!start&&!end)return 'Horários não informados';
+ const from=start?formatWhen(start):'não informado';
+ const to=end?formatWhen(end):'não informado';
+ return `${from} → ${to}`;
+}

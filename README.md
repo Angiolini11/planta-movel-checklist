@@ -204,3 +204,20 @@ Projeto independente para uso piloto e educacional. Ilustrações de equipamento
 ## Atualização V3 — layout simplificado
 
 A V3 reorganiza a navegação, sem alteração do esquema do Supabase. Consulte `ATUALIZACAO-V3-LEIA.txt` para instruções rápidas.
+
+
+## Atualização v4 — períodos de produção (piloto)
+
+Os registros de produção agora aceitam **início e término opcionais**, por atividade, inclusive
+atividades que atravessam a meia-noite. É possível salvar apenas o início e editar o registro
+depois para preencher o término. Horários são exibidos no painel de produção, na passagem,
+no histórico e no PDF. Horários antigos permanecem em branco.
+
+**Antes de publicar os arquivos novos no GitHub**, execute no Supabase SQL Editor:
+`supabase/migrations/202611030003_production_periods.sql`.
+O arquivo acrescenta duas colunas e uma validação de período restrita ao turno em questão.
+Não apaga dados e não altera a autenticação. Depois, atualize o repositório GitHub;
+o fluxo de Actions publica a nova versão. Não envie `.env.local` para o GitHub.
+
+Este é um piloto. O banco real e a comunicação online ainda precisam de testes de integração
+antes de qualquer utilização com dados operacionais reais.

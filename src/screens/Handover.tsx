@@ -3,7 +3,7 @@ import {AlertCircle,ArrowRight,CheckCircle2,ClipboardCheck,Download,FileCheck2,L
 import {CONDITIONS,MODULES} from '../lib/catalog';
 import {moduleProgress} from './Modules';
 import {supabase} from '../lib/supabase';
-import {formatFullWhen,formatWhen,isShiftEnded} from '../lib/time';
+import {formatFullWhen,formatWhen,isShiftEnded,productionPeriodLabel} from '../lib/time';
 import {makePdf} from '../lib/pdf';
 import {Panel,Button,Empty,Pill,Photo,Stamp} from '../components/Shared';
 import type {ScreenProps} from './common';
@@ -48,7 +48,7 @@ export function HandoverScreen(props:ScreenProps&{canClose:boolean}){
   <Panel title="Condição dos módulos" sub="Situação informada pela equipe, não é uma autorização de liberação.">
    <div className="status-grid">{MODULES.map(m=>{const st=data.states.find(s=>s.module_code===m.code);const a=data.answers.filter(x=>x.module_code===m.code);const h=data.meters.filter(x=>x.module_code===m.code).sort((x,y)=>y.created_at.localeCompare(x.created_at));const start=h.find(x=>x.reading_type==='inicial'),end=h.find(x=>x.reading_type==='final');return <div className="status-item" key={m.code}><strong>{m.code}</strong><span>{CONDITIONS.find(x=>x.value===st?.condition)?.label||'Condição não informada'}</span><small>Checklist: {a.length} item(ns) respondido(s)</small><small>Horímetro: {start?.value??'—'} → {end?.value??'—'}</small></div>;})}</div>
   </Panel>
-  <div className="two-col"><Panel title="Produção" sub="Materiais e atividades registrados.">{data.production.length?<div className="record-list compact">{data.production.map(x=><div className="record" key={x.id}><div className="record-top"><strong>{x.material==='Outro'?x.other_material:x.material}</strong><span>{x.tonnage===null?'—':`${x.tonnage} t`}</span></div><p className="muted">{x.modules.join(' · ')}</p></div>)}</div>:<Empty text="Sem informação de produção."/>}</Panel>
+  <div className="two-col"><Panel title="Produção" sub="Materiais e atividades registrados.">{data.production.length?<div className="record-list compact">{data.production.map(x=><div className="record" key={x.id}><div className="record-top"><strong>{x.material==='Outro'?x.other_material:x.material}</strong><span>{x.tonnage===null?'—':`${x.tonnage} t`}</span></div><p className="muted">{x.modules.join(' · ')}</p><p className="muted">{productionPeriodLabel(x.starts_at,x.ends_at)}</p></div>)}</div>:<Empty text="Sem informação de produção."/>}</Panel>
    <Panel title="Paradas e ocorrências" sub="Registros importantes realizados no turno."><div className="record-list compact">{[...data.stops.map(s=>({id:s.id,title:`Parada · ${s.affected}`,desc:s.reason,time:s.created_at})),...data.occurrences.map(o=>({id:o.id,title:`Ocorrência · ${o.category}`,desc:o.description,time:o.happened_at}))].sort((a,b)=>b.time.localeCompare(a.time)).map(x=><div className="record" key={x.id}><strong>{x.title}</strong><p>{x.desc}</p><Stamp date={x.time}/></div>)}{!data.stops.length&&!data.occurrences.length&&<Empty text="Sem registros de parada ou ocorrência."/>}</div></Panel></div>
   <Panel title={`Pendências abertas (${issues.length})`} sub="Inclui pendências de turnos anteriores ainda não resolvidas.">
    {issues.length?<div className="record-list">{issues.map(i=><IssueRow key={i.id} issue={i} canEdit={canEdit} busy={busy} action={action}/>)}</div>:<div className="positive-empty"><CheckCircle2 size={18}/> Nenhuma pendência em aberto.</div>}

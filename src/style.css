@@ -48,3 +48,5 @@
 /* Fotos inteiras no enquadramento, inclusive as adicionadas pelo Configurador */
 .module-photo>img{object-fit:contain;background:#3c464c}
 .module-detail-hero img{object-fit:contain;background:#394248}
+
+.production-times{margin:14px 0 4px}.production-times-hint{font-size:.76rem;line-height:1.5;margin:5px 0 14px}

@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import {Camera,Clock3,Plus,Save,Upload} from 'lucide-react';
 import {MATERIALS,MODULES,OCCURRENCE_CATEGORIES,STOP_REASONS,type ModuleCode} from '../lib/catalog';
 import {supabase,uploadPhoto} from '../lib/supabase';
-import {displayDuration,durationMins,formatWhen,spInputNow,spInputToISO,spParts} from '../lib/time';
+import {displayDuration,durationMins,formatWhen,productionPeriodError,productionPeriodLabel,spInputNow,spInputToISO,spParts} from '../lib/time';
 import {Panel,Button,Empty,Pill,Photo,Stamp} from '../components/Shared';
 import type {ScreenProps} from './common';
 import type {Downtime,ProductionRecord,Occurrence} from '../lib/types';
@@ -13,14 +13,18 @@ export function ProductionScreen(props:ScreenProps){
  const [edit,setEdit]=useState<ProductionRecord|null>(null);
  const [material,setMaterial]=useState('Hematita Bocaina');const [other,setOther]=useState('');
  const [modules,setModules]=useState<ModuleCode[]>(['QA452']);const [tonnage,setTonnage]=useState('');const [notes,setNotes]=useState('');
- function reset(){setEdit(null);setMaterial('Hematita Bocaina');setOther('');setModules(['QA452']);setTonnage('');setNotes('');}
+ const [productionStart,setProductionStart]=useState('');const [productionEnd,setProductionEnd]=useState('');
+ function reset(){setEdit(null);setMaterial('Hematita Bocaina');setOther('');setModules(['QA452']);setTonnage('');setNotes('');setProductionStart('');setProductionEnd('');}
  useEffect(reset,[shift.id]);
- function editRecord(p:ProductionRecord){setEdit(p);setMaterial(p.material);setOther(p.other_material||'');setModules(p.modules);setTonnage(p.tonnage===null?'':String(p.tonnage));setNotes(p.notes||'');window.scrollTo({top:0,behavior:'smooth'});}
+ function editRecord(p:ProductionRecord){setEdit(p);setMaterial(p.material);setOther(p.other_material||'');setModules(p.modules);setTonnage(p.tonnage===null?'':String(p.tonnage));setNotes(p.notes||'');setProductionStart(toSPInput(p.starts_at));setProductionEnd(toSPInput(p.ends_at));window.scrollTo({top:0,behavior:'smooth'});}
  const badTonnage=tonnage.trim()!==''&&(!Number.isFinite(Number(tonnage.replace(',','.')))||Number(tonnage.replace(',','.'))<0);
+ const startISO=spInputToISO(productionStart),endISO=spInputToISO(productionEnd);
+ const periodError=(productionStart&&!startISO)||(productionEnd&&!endISO)?'Informe uma data e um horário válidos.':productionPeriodError(startISO,endISO,shift);
+ const productionMinutes=durationMins(startISO,endISO);
  async function save(){
   const ok=await action(async()=>{
     const values={material,other_material:material==='Outro'?other.trim():null,modules,
-    tonnage:tonnage.trim()===''?null:Number(tonnage.replace(',','.')),notes:notes.trim()||null};
+    tonnage:tonnage.trim()===''?null:Number(tonnage.replace(',','.')),notes:notes.trim()||null,starts_at:startISO,ends_at:endISO};
     if(edit){const {data:updated,error}=await supabase.from('production_records').update(values).eq('id',edit.id).eq('revision',edit.revision).select('id');if(error)throw error;if(!updated?.length)throw new Error('Registro modificado por outra pessoa. Atualize antes de editar.');}
     else{const {error}=await supabase.from('production_records').insert({...values,shift_id:shift.id});if(error)throw error;}
   },edit?'Produção atualizada.':'Atividade de produção registrada.');
@@ -34,12 +38,19 @@ export function ProductionScreen(props:ScreenProps){
     <div className="form-grid"><label>Material processado<select value={material} onChange={e=>setMaterial(e.target.value)}>{MATERIALS.map(x=><option key={x}>{x}</option>)}</select></label>
     {material==='Outro'&&<label>Nome do material<input value={other} onChange={e=>setOther(e.target.value)} placeholder="Informe o material"/></label>}
     <label>Tonelagem produzida (t) · opcional<input inputMode="decimal" value={tonnage} onChange={e=>setTonnage(e.target.value)} placeholder="Ex.: 320,5 ou deixar vazio"/>{badTonnage&&<span className="field-error">Informe um número positivo ou zero.</span>}</label></div>
+    <div className="form-grid production-times">
+     <label>Início da produção · opcional<input type="datetime-local" value={productionStart} onChange={e=>setProductionStart(e.target.value)}/></label>
+     <label>Término da produção · opcional<input type="datetime-local" value={productionEnd} onChange={e=>setProductionEnd(e.target.value)}/></label>
+    </div>
+    <p className="muted production-times-hint">Para uma atividade em andamento, registre apenas o início e complete o término depois. Se passar da meia-noite, escolha a data seguinte.</p>
+    {periodError&&<p className="error-box">{periodError}</p>}
+    {!periodError&&startISO&&endISO&&productionMinutes!==null&&<p className="info-line"><Clock3 size={16}/> Duração da atividade: <strong>{displayDuration(productionMinutes)}</strong></p>}
     <fieldset className="module-picker"><legend>Módulos utilizados</legend>{MODULES.map(m=><label key={m.code} className="check-tile"><input type="checkbox" checked={modules.includes(m.code)} onChange={e=>setModules(old=>e.target.checked?[...old,m.code]:old.filter(x=>x!==m.code))}/><span>{m.code}</span><small>{m.title}</small></label>)}</fieldset>
     <label>Observações (opcional)<textarea rows={3} value={notes} onChange={e=>setNotes(e.target.value)} placeholder="Descrição da atividade, material ou operação..."/></label>
-    <div className="action-row"><Button disabled={busy||badTonnage||!modules.length||(material==='Outro'&&other.trim().length<2)} onClick={save}><Plus size={17}/> {edit?"Salvar edição":"Registrar atividade"}</Button>{edit&&<Button variant="outline" onClick={reset}>Cancelar</Button>}</div>
+    <div className="action-row"><Button disabled={busy||badTonnage||!!periodError||!modules.length||(material==='Outro'&&other.trim().length<2)} onClick={save}><Plus size={17}/> {edit?"Salvar edição":"Registrar atividade"}</Button>{edit&&<Button variant="outline" onClick={reset}>Cancelar</Button>}</div>
    </Panel>}
   <Panel title="Produção registrada" sub="Registros individuais identificados por operador e horário.">
-   {data.production.length? <div className="record-list">{data.production.map(p=><article key={p.id} className="record"><div className="record-top"><strong>{p.material==='Outro'?p.other_material:p.material}</strong><Pill text={p.tonnage===null?'Tonelagem não informada':`${Number(p.tonnage).toLocaleString('pt-BR')} t`} kind="neutral"/></div><p className="muted">Equipamentos: {p.modules.join(' · ')}</p>{p.notes&&<p>{p.notes}</p>}<Stamp name={p.operator_name} date={p.created_at}/><RecordControls canEdit={canEdit} busy={busy} edited={p.edited} onEdit={()=>editRecord(p)} onAnnul={()=>{void annulRecord("production_records",p.id,p.revision,action);}}/></article>)}</div>:<Empty text="Nenhuma atividade de produção registrada."/>}
+   {data.production.length? <div className="record-list">{data.production.map(p=><article key={p.id} className="record"><div className="record-top"><strong>{p.material==='Outro'?p.other_material:p.material}</strong><Pill text={p.tonnage===null?'Tonelagem não informada':`${Number(p.tonnage).toLocaleString('pt-BR')} t`} kind="neutral"/></div><p className="muted">Equipamentos: {p.modules.join(' · ')}</p><p className="muted">Período: {productionPeriodLabel(p.starts_at,p.ends_at)}{p.starts_at&&p.ends_at?` · ${displayDuration(durationMins(p.starts_at,p.ends_at))}`:''}</p>{p.notes&&<p>{p.notes}</p>}<Stamp name={p.operator_name} date={p.created_at}/><RecordControls canEdit={canEdit} busy={busy} edited={p.edited} onEdit={()=>editRecord(p)} onAnnul={()=>{void annulRecord("production_records",p.id,p.revision,action);}}/></article>)}</div>:<Empty text="Nenhuma atividade de produção registrada."/>}
   </Panel>
  </div>;
 }

@@ -2,7 +2,7 @@ import {jsPDF} from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {MODULES,CONDITIONS} from './catalog';
 import type {Shift,ShiftData} from './types';
-import {formatDate,formatWhen,durationMins,displayDuration} from './time';
+import {formatDate,formatWhen,durationMins,displayDuration,productionPeriodLabel} from './time';
 const red:[number,number,number]=[182,66,61];
 const dark:[number,number,number]=[51,58,64];
 const money=(v:number|null|undefined)=>v===null||v===undefined?'Não informado':Number(v).toLocaleString('pt-BR',{maximumFractionDigits:2});
@@ -41,8 +41,8 @@ export function makePdf(shift:Shift,data:ShiftData){
  }));
  section('Produção e materiais');
  const total=data.production.reduce((sum,r)=>sum+(r.tonnage===null?0:Number(r.tonnage)),0);
- table(['Material / atividade','Módulos','Tonelagem (t)'],data.production.length?
-  data.production.slice(0,9).map(r=>[(r.material==='Outro'?r.other_material:r.material)||'',r.modules.join(' / '),money(r.tonnage)]):[['Nenhum registro','—','—']]);
+ table(['Material / atividade','Módulos','Período (início → fim)','Tonelagem (t)'],data.production.length?
+  data.production.slice(0,9).map(r=>[(r.material==='Outro'?r.other_material:r.material)||'',r.modules.join(' / '),productionPeriodLabel(r.starts_at,r.ends_at),money(r.tonnage)]):[['Nenhum registro','—','—','—']]);
  if(data.production.length){doc.setFontSize(8);doc.setTextColor(...dark);doc.text(`Soma dos registros com tonelagem: ${money(total)} t (sem duplicar por módulo).`,margin,y+2);y+=5;}
  if(data.production.length>9){doc.setFontSize(8);doc.text(`+ ${data.production.length-9} registro(s) adicional(is) disponíveis no sistema.`,margin,y+2);y+=5;}
  section('Paradas e ocorrências');
