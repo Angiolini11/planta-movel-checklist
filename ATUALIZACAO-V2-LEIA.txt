@@ -1,0 +1,30 @@
+ATUALIZAÇÃO V2 — EDIÇÃO E ANULAÇÃO COMPARTILHADA (SOMENTE PILOTO)
+
+1) No Supabase do projeto que você já criou, abra SQL Editor > New query.
+2) Copie e execute o conteúdo inteiro de:
+   supabase/migrations/202611030002_pilot_edits.sql
+   (Não execute de novo a migração inicial.)
+3) Extraia este ZIP em uma pasta nova no seu computador.
+4) Copie seu arquivo .env.local da pasta antiga para a pasta nova.
+   Ele não vem dentro do ZIP, para preservar suas configurações.
+5) No terminal CMD da nova pasta:
+   npm install
+   npm run dev
+6) Abra http://localhost:5173 e teste com dados fictícios.
+
+O QUE MUDOU
+- Qualquer participante autenticado do mesmo turno atual e aberto pode editar
+  ou anular horímetros, produção, paradas, ocorrências e observações.
+- Respostas do checklist também podem ser alteradas e anuladas.
+- Os registros anulados não aparecem nas telas, consultas e PDF.
+- Um registro editado mostra só a versão atual e o indicador "Editado".
+- Não são gerados novos eventos de auditoria operacional por esta migração.
+- Eventos antigos e logs/backups do Supabase podem continuar existindo.
+- Turnos encerrados/anteriores permanecem protegidos.
+- Pendências resolvidas impedem anular o registro de origem.
+
+Atenção: não foi possível compilar/rodar o site neste ambiente porque o acesso
+à instalação npm está indisponível. Os testes estáticos passaram; a validação
+online do banco e dos fluxos precisa ser feita no seu projeto Supabase.
+
+NÃO USAR DADOS OPERACIONAIS REAIS ANTES DE TESTES/HOMOLOGAÇÃO.

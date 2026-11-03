@@ -1,0 +1,26 @@
+PLANTA MOVEL - SITE DE CHECKLIST E PASSAGEM DE TURNO (VERSAO 1)
+
+ESTE ZIP CONTEM O CODIGO DO SITE, O BANCO DE DADOS, AS REGRAS DE ACESSO
+E O MODELO DE PUBLICACAO NO GITHUB PAGES.
+
+O SITE NAO ESTA PUBLICADO NEM CONECTADO A UM BANCO DE DADOS REAL.
+PARA FUNCIONAR ONLINE, VOCE PRECISA DE UM PROJETO SUPABASE.
+
+PASSOS PRINCIPAIS:
+
+1. Extraia este ZIP para uma pasta no computador.
+2. Leia o arquivo README.md (explicacao detalhada em portugues).
+3. Crie um projeto Supabase.
+4. Cole o script supabase/migrations/202611020001_initial.sql no SQL Editor.
+5. Configure e publique a Edge Function operator-auth (veja o README).
+6. Preencha o arquivo .env.local com a URL/chave PUBLICA do Supabase.
+7. Abra o terminal na pasta, rode npm install e npm run dev.
+8. Depois, publique no GitHub Pages, se desejar acesso sem o PC ligado.
+
+SEGURANCA:
+- NUNCA coloque service_role nem AUTH_PIN_PEPPER no codigo do site.
+- Somente o Configurador pode trocar fotos oficiais ou redefinir PIN.
+- Cadastro livre e checklists preliminares sao APENAS para teste/homologacao.
+
+Os testes locais de logica/data passam. A compilacao e testes integrados
+com Supabase dependem da instalacao das bibliotecas e da configuracao online.

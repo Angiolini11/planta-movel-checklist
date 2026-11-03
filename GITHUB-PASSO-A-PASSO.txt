@@ -1,0 +1,19 @@
+PUBLICAR V3 REACT NO GITHUB PAGES
+
+1. GitHub > New repository: planta-movel-checklist (Public), branch main.
+2. Copiar para a raiz do repositorio o CONTEUDO desta pasta (incluindo .github).
+   Nao carregar .env.local, node_modules ou dist.
+3. Settings > Secrets and variables > Actions > Variables > New repository variable:
+   VITE_SUPABASE_URL = Project URL do Supabase.
+   VITE_SUPABASE_ANON_KEY = publishable key/anon publica do Supabase.
+   NUNCA cadastrar service_role, sb_secret, AUTH_PIN_PEPPER ou senhas.
+4. Settings > Pages > Build and deployment > Source: GitHub Actions.
+5. Actions > Publicar frontend no GitHub Pages > Run workflow (branch main).
+6. Apos a implantacao verde, abrir https://SEU_USUARIO.github.io/planta-movel-checklist/
+
+O arquivo .github/workflows/deploy.yml compila usando GitHub Actions, nao precisa instalar Node no computador para publicar.
+Fotos JPEG locais ja foram adicionadas como imagens padrao dos tres modelos (enviadas pelo usuario).
+Se houver fotos configuradas pelo Configurador no Supabase, elas continuam tendo prioridade.
+
+ATENCAO: REPOSITORIO PUBLICO = SITE ACESSIVEL PUBLICAMENTE.
+O cadastro do piloto e livre. Antes de usar registros operacionais reais, configurar controles de acesso, homologacao e politica de privacidade.

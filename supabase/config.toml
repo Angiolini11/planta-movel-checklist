@@ -1,0 +1,6 @@
+project_id = "planta-movel-checklist"
+
+# Esta função valida manualmente o token nos caminhos administrativos.
+# Cadastro e login não possuem JWT por definição.
+[functions.operator-auth]
+verify_jwt = false

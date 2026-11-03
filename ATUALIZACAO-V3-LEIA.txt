@@ -1,0 +1,25 @@
+VERSÃO 3 — NAVEGAÇÃO SIMPLIFICADA (ESTILO BOLETIM)
+
+O que mudou:
+- Menu de navegação horizontal no computador e barra inferior no celular.
+- A página Início destaca as fotos dos três equipamentos antes de mostrar indicadores.
+- Produção, Paradas e Ocorrências estão na mesma seção REGISTROS, com três abas.
+- Data e turno permanecem visíveis, com opções de alteração recolhidas até clicar em "Alterar data / turno".
+- Estatísticas ficam na área expansível "Resumo do turno".
+
+O que NÃO mudou:
+- As fotos configuradas pelo Configurador no Supabase continuam sendo usadas.
+- Login/PIN, banco, regras de edição/anulação do piloto, checklists, PDF, histórico e permissões.
+- Não há alterações de SQL nesta versão. Ela usa as migrações já aplicadas na versão 2.
+
+COMO ATUALIZAR:
+1. Faça uma cópia de segurança da pasta anterior.
+2. Extraia este ZIP numa nova pasta.
+3. Copie o arquivo .env.local DA PASTA ANTERIOR para a pasta extraída. Não compartilhe esse arquivo publicamente.
+4. Abra o cmd dentro da pasta nova e rode: npm install
+5. Depois: npm run dev
+6. Abra o endereço indicado pelo terminal (geralmente http://localhost:5173).
+   Se a versão antiga ainda estiver rodando, Ctrl+C no terminal antigo.
+
+A versão 3 muda apenas a interface. Não é necessário executar SQL novo ou recriar operadores.
+Teste com dados fictícios até a homologação de segurança para uso operacional.
